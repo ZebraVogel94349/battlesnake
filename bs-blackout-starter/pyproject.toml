@@ -1,0 +1,24 @@
+[project]
+name = "bs-blackout-starter"
+version = "0.1.0"
+description = "Battlesnake Blackout agents, PPO training, evaluation, and local visualization"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "flask>=3.1.3",
+    "gymnasium>=1.3.0",
+    "numpy>=2.4.4",
+    "pydantic>=2.12.5",
+    "hisss>=1.3.0",
+    "sb3-contrib>=2.9.0",
+    "stable-baselines3>=2.9.0",
+    "tensorboard>=2.20.0",
+    "torch>=2.12.1"
+]
+
+[build-system]
+requires = ["setuptools>=80"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = []

@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battlesnake Blackout GUI Visualizer</title>
+    <!-- Modern typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --panel-bg: rgba(21, 28, 44, 0.75);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-color: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent-color: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.3);
+            --danger-color: #ef4444;
+            --success-color: #10b981;
+            --panel-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            
+            --snake-0: #ff3b30;
+            --snake-1: #34c759;
+            --snake-2: #007aff;
+            --snake-3: #ffcc00;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(11, 15, 25, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        header h1 span {
+            font-size: 1.4rem;
+        }
+
+        .header-tag {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            padding: 1.5rem;
+            gap: 1.5rem;
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+            height: calc(100vh - 80px);
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* Sidebar Panel */
+        .sidebar {
+            width: 380px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-shadow: var(--panel-shadow);
+            backdrop-filter: blur(20px);
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-left: 3px solid var(--accent-color);
+            padding-left: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .select-input, .number-input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: var(--text-color);
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .select-input:focus, .number-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        .grid-settings-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Snake selector rows */
+        .snake-selector-card {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .snake-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .snake-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .snake-0-dot { background-color: var(--snake-0); box-shadow: 0 0 8px var(--snake-0); }
+        .snake-1-dot { background-color: var(--snake-1); box-shadow: 0 0 8px var(--snake-1); }
+        .snake-2-dot { background-color: var(--snake-2); box-shadow: 0 0 8px var(--snake-2); }
+        .snake-3-dot { background-color: var(--snake-3); box-shadow: 0 0 8px var(--snake-3); }
+
+        .btn-simulate {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: white;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 1.05rem;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+
+        .btn-simulate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+            filter: brightness(1.1);
+        }
+
+        .btn-simulate:active {
+            transform: translateY(0);
+        }
+
+        .btn-simulate:disabled {
+            background: #4b5563;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Center Board Panel */
+        .board-container {
+            flex: 1;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            box-shadow: var(--panel-shadow);
+            backdrop-filter: blur(20px);
+            align-items: center;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        .board-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .perspective-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .canvas-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 0; /* Important for flex child sizing */
+            position: relative;
+        }
+
+        #gameCanvas {
+            background-color: #0f172a;
+            border-radius: 12px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6), 0 4px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            max-width: 100%;
+            max-height: 100%;
+            aspect-ratio: 1 / 1;
+        }
+
+        /* Playback Controls */
+        .playback-controls {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .playback-buttons-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 42px;
+            height: 42px;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: all 0.15s ease;
+            outline: none;
+        }
+
+        .btn-icon:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--text-muted);
+            transform: scale(1.05);
+        }
+
+        .btn-icon:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .btn-icon:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn-play {
+            background: var(--accent-color);
+            border-color: transparent;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-play:hover:not(:disabled) {
+            background: #2563eb;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+
+        .timeline-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .timeline-slider {
+            flex: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .timeline-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            box-shadow: 0 0 8px var(--accent-glow);
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .timeline-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .speed-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .speed-slider {
+            width: 100px;
+            height: 4px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--text-color);
+            cursor: pointer;
+        }
+
+        /* Right Panel (Scoreboard & Console Log) */
+        .right-panel {
+            width: 380px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: 100%;
+            min-height: 0;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--panel-shadow);
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .scoreboard-panel {
+            flex: 1;
+            max-height: 50%;
+        }
+
+        .log-panel {
+            flex: 1;
+            max-height: 50%;
+        }
+
+        /* Scoreboard design */
+        .snake-score-card {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .snake-score-card.eliminated {
+            opacity: 0.5;
+            border-color: rgba(239, 68, 68, 0.2);
+            background: rgba(239, 68, 68, 0.03);
+        }
+
+        .snake-score-card.active-perspective {
+            border-color: #60a5fa;
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.15);
+        }
+
+        .score-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .score-stats {
+            display: flex;
+            gap: 0.75rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .health-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.25rem;
+        }
+
+        .health-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .elimination-cause {
+            font-size: 0.75rem;
+            color: var(--danger-color);
+            margin-top: 0.2rem;
+            font-style: italic;
+        }
+
+        /* Console log design */
+        .log-container {
+            flex: 1;
+            background: #090d16;
+            border-radius: 10px;
+            padding: 0.75rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            min-height: 0;
+        }
+
+        .log-entry {
+            line-height: 1.4;
+            color: #d1d5db;
+        }
+
+        .log-entry.turn-header {
+            color: #60a5fa;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+            padding-bottom: 0.2rem;
+            margin-top: 0.4rem;
+            font-weight: 600;
+        }
+
+        .log-entry.elimination {
+            color: var(--danger-color);
+            background: rgba(239, 68, 68, 0.08);
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+        }
+
+        .log-entry.system {
+            color: #10b981;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border-left-color: white;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🐍 Battlesnake Blackout <span>Visualizer</span></h1>
+        <div class="header-tag">IEEE CoG 2026 Ruleset</div>
+    </header>
+
+    <div class="main-container">
+        <!-- Left panel - Configuration -->
+        <div class="sidebar">
+            <div class="section-title">Game Settings</div>
+            
+            <div class="grid-settings-row">
+                <div class="form-group">
+                    <label for="boardWidth">Board Width</label>
+                    <select id="boardWidth" class="select-input">
+                        <option value="7">7 x 7</option>
+                        <option value="11">11 x 11</option>
+                        <option value="15" selected>15 x 15</option>
+                        <option value="19">19 x 19</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="viewRadius">View Radius</label>
+                    <select id="viewRadius" class="select-input">
+                        <option value="3">3 (Very Short)</option>
+                        <option value="5" selected>5 (Standard)</option>
+                        <option value="8">8 (Large)</option>
+                        <option value="none">None (Perfect Info)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section-title">Agents Configuration</div>
+            
+            <!-- Snake 1 -->
+            <div class="snake-selector-card">
+                <div class="snake-label-row">
+                    <label for="snake1Agent" style="font-weight: 600; color: var(--text-color);">
+                        <span class="snake-dot snake-0-dot"></span> Snake 1
+                    </label>
+                </div>
+                <select id="snake1Agent" class="select-input snake-agent-select">
+                    <!-- Loaded via API -->
+                </select>
+            </div>
+
+            <!-- Snake 2 -->
+            <div class="snake-selector-card">
+                <div class="snake-label-row">
+                    <label for="snake2Agent" style="font-weight: 600; color: var(--text-color);">
+                        <span class="snake-dot snake-1-dot"></span> Snake 2
+                    </label>
+                </div>
+                <select id="snake2Agent" class="select-input snake-agent-select">
+                    <!-- Loaded via API -->
+                </select>
+            </div>
+
+            <!-- Snake 3 -->
+            <div class="snake-selector-card">
+                <div class="snake-label-row">
+                    <label for="snake3Agent" style="font-weight: 600; color: var(--text-color);">
+                        <span class="snake-dot snake-2-dot"></span> Snake 3
+                    </label>
+                </div>
+                <select id="snake3Agent" class="select-input snake-agent-select">
+                    <option value="disabled">Empty / Disabled</option>
+                </select>
+            </div>
+
+            <!-- Snake 4 -->
+            <div class="snake-selector-card">
+                <div class="snake-label-row">
+                    <label for="snake4Agent" style="font-weight: 600; color: var(--text-color);">
+                        <span class="snake-dot snake-3-dot"></span> Snake 4
+                    </label>
+                </div>
+                <select id="snake4Agent" class="select-input snake-agent-select">
+                    <option value="disabled">Empty / Disabled</option>
+                </select>
+            </div>
+
+            <button id="btnRunSim" class="btn-simulate">
+                <span>Run Simulation</span>
+            </button>
+        </div>
+
+        <!-- Center panel - Board & Playback -->
+        <div class="board-container">
+            <div class="board-header">
+                <div class="perspective-group">
+                    <label for="perspectiveSelect" style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">VIEW PERSPECTIVE:</label>
+                    <select id="perspectiveSelect" class="select-input" style="padding: 0.5rem 2rem 0.5rem 0.75rem; font-size: 0.85rem; width: auto; background: rgba(30, 41, 59, 0.8);">
+                        <option value="god">God Mode (Perfect Vision)</option>
+                        <option value="snake-0">Snake 1 (Red)</option>
+                        <option value="snake-1">Snake 2 (Green)</option>
+                        <option value="snake-2" id="perspSnake2" disabled>Snake 3 (Blue)</option>
+                        <option value="snake-3" id="perspSnake3" disabled>Snake 4 (Yellow)</option>
+                    </select>
+                </div>
+                
+                <div class="perspective-group">
+                    <input type="checkbox" id="showMemoryCheck" checked style="cursor: pointer; width: 16px; height: 16px;">
+                    <label for="showMemoryCheck" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; cursor: pointer; user-select: none;">SHOW AGENT MEMORY</label>
+                </div>
+            </div>
+
+            <div class="canvas-wrapper">
+                <canvas id="gameCanvas" width="600" height="600"></canvas>
+            </div>
+
+            <!-- Playback -->
+            <div class="playback-controls">
+                <div class="timeline-slider-container">
+                    <span id="currentTimeDisplay" style="font-family: monospace; font-size: 0.9rem; width: 50px;">T: 0</span>
+                    <input type="range" id="timelineSlider" class="timeline-slider" min="0" max="0" value="0" disabled>
+                    <span id="maxTimeDisplay" style="font-family: monospace; font-size: 0.9rem; width: 50px; text-align: right;">T: 0</span>
+                </div>
+
+                <div class="playback-buttons-row">
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button id="btnPrev" class="btn-icon" disabled title="Previous frame">⏮</button>
+                        <button id="btnPlay" class="btn-play btn-icon" disabled title="Play / Pause">▶</button>
+                        <button id="btnNext" class="btn-icon" disabled title="Next frame">⏭</button>
+                    </div>
+
+                    <div class="speed-slider-container">
+                        <span>Speed:</span>
+                        <input type="range" id="speedSlider" class="speed-slider" min="1" max="15" value="5">
+                        <span id="speedValueDisplay" style="font-family: monospace; width: 40px;">5 fps</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right panel - Stats & Logs -->
+        <div class="right-panel">
+            <!-- Scoreboard -->
+            <div class="panel scoreboard-panel">
+                <div class="section-title">Scoreboard</div>
+                <div id="scoreboardList" style="flex: 1; overflow-y: auto; padding-right: 0.2rem; min-height: 0;">
+                    <div style="color: var(--text-muted); text-align: center; margin-top: 2rem;">No simulation active</div>
+                </div>
+            </div>
+
+            <!-- Logs -->
+            <div class="panel log-panel">
+                <div class="section-title">Simulation Log</div>
+                <div id="logList" class="log-container">
+                    <div class="log-entry system">> Ready. Configure settings and click Run Simulation.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const elWidth = document.getElementById('boardWidth');
+        const elRadius = document.getElementById('viewRadius');
+        const elBtnRunSim = document.getElementById('btnRunSim');
+        const elPerspective = document.getElementById('perspectiveSelect');
+        const elShowMemory = document.getElementById('showMemoryCheck');
+        const elCanvas = document.getElementById('gameCanvas');
+        const elSlider = document.getElementById('timelineSlider');
+        const elTimeDisplay = document.getElementById('currentTimeDisplay');
+        const elMaxDisplay = document.getElementById('maxTimeDisplay');
+        const elBtnPlay = document.getElementById('btnPlay');
+        const elBtnPrev = document.getElementById('btnPrev');
+        const elBtnNext = document.getElementById('btnNext');
+        const elSpeedSlider = document.getElementById('speedSlider');
+        const elSpeedDisplay = document.getElementById('speedValueDisplay');
+        const elScoreboardList = document.getElementById('scoreboardList');
+        const elLogList = document.getElementById('logList');
+        
+        const snakeSelects = [
+            document.getElementById('snake1Agent'),
+            document.getElementById('snake2Agent'),
+            document.getElementById('snake3Agent'),
+            document.getElementById('snake4Agent')
+        ];
+        
+        const elPerspSnake2 = document.getElementById('perspSnake2');
+        const elPerspSnake3 = document.getElementById('perspSnake3');
+
+        // State Variables
+        let availableAgents = [];
+        let simulationHistory = null;
+        let currentFrameIndex = 0;
+        let isPlaying = false;
+        let playIntervalId = null;
+        let playbackFps = 5;
+
+        // Colors Mapping
+        const SNAKE_COLORS = [
+            '#ff3b30', // Red
+            '#34c759', // Green
+            '#007aff', // Blue
+            '#ffcc00'  // Yellow
+        ];
+        
+        const SNAKE_GLOWS = [
+            'rgba(255, 59, 48, 0.4)',
+            'rgba(52, 199, 89, 0.4)',
+            'rgba(0, 122, 255, 0.4)',
+            'rgba(255, 204, 0, 0.4)'
+        ];
+
+        // Canvas Setup
+        const ctx = elCanvas.getContext('2d');
+
+        // Fetch agents on load
+        async function fetchAgents() {
+            try {
+                const res = await fetch('/api/agents');
+                const data = await res.json();
+                availableAgents = data;
+                
+                // Populate selectors
+                snakeSelects.forEach((select, idx) => {
+                    const originalValue = select.value;
+                    select.innerHTML = '';
+                    
+                    // Add empty option if snake index >= 2
+                    if (idx >= 2) {
+                        const optEmpty = document.createElement('option');
+                        optEmpty.value = 'disabled';
+                        optEmpty.textContent = 'Empty / Disabled';
+                        select.appendChild(optEmpty);
+                    }
+                    
+                    data.forEach((agent) => {
+                        const opt = document.createElement('option');
+                        opt.value = agent.id;
+                        opt.textContent = `${agent.name} (by ${agent.author})`;
+                        select.appendChild(opt);
+                    });
+
+                    // Set default values:
+                    if (idx === 0) select.value = 'HungryAgent';
+                    else if (idx === 1) select.value = 'RandomAgent';
+                    else select.value = 'disabled';
+                });
+                
+            } catch (err) {
+                console.error("Failed to load agents:", err);
+                appendLog("System", "Failed to contact visualizer server. Make sure it is running.");
+            }
+        }
+
+        // Run Simulation
+        elBtnRunSim.addEventListener('click', async () => {
+            // Stop any running playback
+            pausePlayback();
+            
+            // Gather parameters
+            const width = parseInt(elWidth.value);
+            const height = width; // square boards in hisss
+            const radiusVal = elRadius.value;
+            const view_radius = radiusVal === 'none' ? null : parseInt(radiusVal);
+            
+            const snakes = [];
+            snakeSelects.forEach((select) => {
+                if (select.value !== 'disabled') {
+                    snakes.push(select.value);
+                }
+            });
+
+            if (snakes.length < 1) {
+                alert("Please enable at least 1 snake!");
+                return;
+            }
+
+            // UI feedback
+            elBtnRunSim.disabled = true;
+            elBtnRunSim.innerHTML = '<span class="spinner"></span> Simulating...';
+            appendLog("System", "Starting simulation request...");
+
+            try {
+                const res = await fetch('/api/simulate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ width, height, view_radius, snakes })
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    simulationHistory = data.history;
+                    currentFrameIndex = 0;
+                    
+                    // Enable playback
+                    elSlider.disabled = false;
+                    elSlider.max = simulationHistory.length - 1;
+                    elSlider.value = 0;
+                    
+                    elBtnPlay.disabled = false;
+                    elBtnPrev.disabled = false;
+                    elBtnNext.disabled = false;
+
+                    // Update perspective dropdown
+                    elPerspSnake2.disabled = snakes.length < 3;
+                    elPerspSnake3.disabled = snakes.length < 4;
+                    
+                    appendLog("System", `Simulation run complete! Played ${simulationHistory.length - 1} turns.`);
+                    
+                    // Populate initial scoreboard and render
+                    updateScoreboard();
+                    updateFullLogs();
+                    renderFrame();
+                } else {
+                    appendLog("Error", data.error || "Unknown error during simulation");
+                    alert("Simulation failed: " + data.error);
+                }
+            } catch (err) {
+                console.error("Simulation request error:", err);
+                appendLog("Error", "Could not connect to simulation server.");
+            } finally {
+                elBtnRunSim.disabled = false;
+                elBtnRunSim.textContent = 'Run Simulation';
+            }
+        });
+
+        // Logging
+        function appendLog(type, text) {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            if (type === 'System') entry.className += ' system';
+            else if (type === 'Error') entry.className += ' elimination';
+            entry.textContent = `> [${type}] ${text}`;
+            elLogList.appendChild(entry);
+            elLogList.scrollTop = elLogList.scrollHeight;
+        }
+
+        // Timeline Scrubbing
+        elSlider.addEventListener('input', () => {
+            currentFrameIndex = parseInt(elSlider.value);
+            renderFrame();
+            updateScoreboard();
+        });
+
+        // Prev / Next frame
+        elBtnPrev.addEventListener('click', () => {
+            pausePlayback();
+            if (currentFrameIndex > 0) {
+                currentFrameIndex--;
+                elSlider.value = currentFrameIndex;
+                renderFrame();
+                updateScoreboard();
+            }
+        });
+
+        elBtnNext.addEventListener('click', () => {
+            pausePlayback();
+            if (simulationHistory && currentFrameIndex < simulationHistory.length - 1) {
+                currentFrameIndex++;
+                elSlider.value = currentFrameIndex;
+                renderFrame();
+                updateScoreboard();
+            }
+        });
+
+        // Playback Loop
+        elBtnPlay.addEventListener('click', () => {
+            if (isPlaying) {
+                pausePlayback();
+            } else {
+                startPlayback();
+            }
+        });
+
+        function startPlayback() {
+            if (!simulationHistory) return;
+            isPlaying = true;
+            elBtnPlay.textContent = '⏸';
+            elBtnPlay.title = 'Pause';
+            
+            // Loop if we are at the end
+            if (currentFrameIndex >= simulationHistory.length - 1) {
+                currentFrameIndex = 0;
+                elSlider.value = 0;
+            }
+
+            playIntervalId = setInterval(() => {
+                if (currentFrameIndex < simulationHistory.length - 1) {
+                    currentFrameIndex++;
+                    elSlider.value = currentFrameIndex;
+                    renderFrame();
+                    updateScoreboard();
+                } else {
+                    pausePlayback();
+                }
+            }, 1000 / playbackFps);
+        }
+
+        function pausePlayback() {
+            isPlaying = false;
+            elBtnPlay.textContent = '▶';
+            elBtnPlay.title = 'Play';
+            if (playIntervalId) {
+                clearInterval(playIntervalId);
+                playIntervalId = null;
+            }
+        }
+
+        // FPS Speed Control
+        elSpeedSlider.addEventListener('input', () => {
+            playbackFps = parseInt(elSpeedSlider.value);
+            elSpeedDisplay.textContent = `${playbackFps} fps`;
+            if (isPlaying) {
+                pausePlayback();
+                startPlayback();
+            }
+        });
+
+        // Perspective Selection
+        elPerspective.addEventListener('change', () => {
+            renderFrame();
+            updateScoreboardActivePerspective();
+        });
+
+        // Show memory toggle
+        elShowMemory.addEventListener('change', () => {
+            renderFrame();
+        });
+
+        // Scoreboard Update
+        function updateScoreboard() {
+            if (!simulationHistory) return;
+            const frame = simulationHistory[currentFrameIndex];
+            
+            elScoreboardList.innerHTML = '';
+            frame.snakes.forEach((snake, idx) => {
+                const card = document.createElement('div');
+                card.className = `snake-score-card ${snake.alive ? '' : 'eliminated'}`;
+                
+                // Highlight if it's the active perspective view
+                const activePersp = elPerspective.value;
+                if (activePersp === `snake-${idx}`) {
+                    card.className += ' active-perspective';
+                }
+
+                // Header with color circle, name and action made
+                let actionText = '';
+                if (frame.actions && frame.actions[idx]) {
+                    actionText = ` (${frame.actions[idx]})`;
+                }
+
+                // Check cause of death
+                let causeHTML = '';
+                if (!snake.alive && snake.elimination_event) {
+                    const ev = snake.elimination_event;
+                    causeHTML = `<div class="elimination-cause">Eliminated Turn ${ev.turn}: ${ev.cause}${ev.by ? ' by ' + ev.by : ''}</div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="score-header">
+                        <div class="score-name">
+                            <span class="snake-dot" style="background-color: ${snake.color}; box-shadow: 0 0 8px ${snake.color};"></span>
+                            ${snake.name}${actionText}
+                        </div>
+                        <div class="score-stats">
+                            <span>LEN: <strong>${snake.length}</strong></span>
+                            <span>HP: <strong>${snake.health}</strong></span>
+                        </div>
+                    </div>
+                    <div class="health-bar-container">
+                        <div class="health-bar" style="width: ${snake.health}%; background-color: ${snake.health > 50 ? '#10b981' : snake.health > 20 ? '#fbbf24' : '#ef4444'};"></div>
+                    </div>
+                    ${causeHTML}
+                `;
+
+                // Let user click to select perspective
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', () => {
+                    if (snake.alive || snake.elimination_event) {
+                        elPerspective.value = `snake-${idx}`;
+                        elPerspective.dispatchEvent(new Event('change'));
+                    }
+                });
+
+                elScoreboardList.appendChild(card);
+            });
+        }
+
+        function updateScoreboardActivePerspective() {
+            const cards = elScoreboardList.querySelectorAll('.snake-score-card');
+            const activePersp = elPerspective.value;
+            cards.forEach((card, idx) => {
+                if (activePersp === `snake-${idx}`) {
+                    card.classList.add('active-perspective');
+                } else {
+                    card.classList.remove('active-perspective');
+                }
+            });
+        }
+
+        // Full Logs Generation (Runs once on simulation finish)
+        function updateFullLogs() {
+            if (!simulationHistory) return;
+            elLogList.innerHTML = '';
+            
+            // Reconstruct timeline log
+            simulationHistory.forEach((frame, fIdx) => {
+                if (fIdx === 0) {
+                    const startEntry = document.createElement('div');
+                    startEntry.className = 'log-entry turn-header';
+                    startEntry.textContent = '--- Turn 0 (Initial State) ---';
+                    elLogList.appendChild(startEntry);
+                    
+                    frame.snakes.forEach((snake, idx) => {
+                        const ent = document.createElement('div');
+                        ent.className = 'log-entry';
+                        ent.textContent = `  ${snake.name} starts at (${snake.body[0].x}, ${snake.body[0].y})`;
+                        elLogList.appendChild(ent);
+                    });
+                    return;
+                }
+                
+                const turnEntry = document.createElement('div');
+                turnEntry.className = 'log-entry turn-header';
+                turnEntry.textContent = `--- Turn ${frame.turn} ---`;
+                elLogList.appendChild(turnEntry);
+
+                // Moves log
+                frame.snakes.forEach((snake, idx) => {
+                    const prevFrame = simulationHistory[fIdx - 1];
+                    const wasAlive = prevFrame.snakes[idx].alive;
+                    
+                    if (wasAlive && frame.actions && frame.actions[idx]) {
+                        const moveEnt = document.createElement('div');
+                        moveEnt.className = 'log-entry';
+                        moveEnt.textContent = `  ${snake.name} moves ${frame.actions[idx].toUpperCase()}`;
+                        elLogList.appendChild(moveEnt);
+                    }
+                });
+
+                // Elimination events log
+                frame.snakes.forEach((snake, idx) => {
+                    const prevFrame = simulationHistory[fIdx - 1];
+                    if (prevFrame.snakes[idx].alive && !snake.alive && snake.elimination_event) {
+                        const ev = snake.elimination_event;
+                        const elimEnt = document.createElement('div');
+                        elimEnt.className = 'log-entry elimination';
+                        elimEnt.textContent = `💀 ELIMINATION: ${snake.name} died of ${ev.cause.toUpperCase()}${ev.by ? ' caused by ' + ev.by : ''}`;
+                        elLogList.appendChild(elimEnt);
+                    }
+                });
+            });
+
+            elLogList.scrollTop = elLogList.scrollHeight;
+        }
+
+        // Render Frame on HTML5 Canvas
+        function renderFrame() {
+            if (!simulationHistory) return;
+            const frame = simulationHistory[currentFrameIndex];
+            
+            // Update time display
+            elTimeDisplay.textContent = `T: ${frame.turn}`;
+            elMaxDisplay.textContent = `T: ${simulationHistory.length - 1}`;
+            
+            const w = frame.width;
+            const h = frame.height;
+            const cell = elCanvas.width / w;
+
+            // Clear Canvas
+            ctx.clearRect(0, 0, elCanvas.width, elCanvas.height);
+
+            // Draw Checkerboard Grid Background
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    ctx.fillStyle = (x + y) % 2 === 0 ? '#0b0f19' : '#0f172a';
+                    ctx.fillRect(x * cell, y * cell, cell, cell);
+                    
+                    // Subtle grid borders
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.015)';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(x * cell, y * cell, cell, cell);
+                }
+            }
+
+            // Draw Hazards (as translucent red patterns)
+            frame.hazards.forEach((haz) => {
+                // Draw diagonal stripes
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.2)';
+                const screenX = haz.x * cell;
+                const screenY = (h - 1 - haz.y) * cell;
+                ctx.fillRect(screenX, screenY, cell, cell);
+                
+                ctx.strokeStyle = 'rgba(239, 68, 68, 0.6)';
+                ctx.lineWidth = 1.5;
+                
+                // Draw border around hazard tiles
+                ctx.strokeRect(screenX + 1, screenY + 1, cell - 2, cell - 2);
+            });
+
+            // Draw Food
+            frame.food.forEach((food) => {
+                const screenX = food.x * cell + cell / 2;
+                const screenY = (h - 1 - food.y) * cell + cell / 2;
+                const radius = cell * 0.3;
+
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, radius, 0, 2 * Math.PI);
+                ctx.fillStyle = '#ef4444';
+                
+                // Food outer glow
+                ctx.shadowColor = '#ef4444';
+                ctx.shadowBlur = 10;
+                ctx.fill();
+                
+                // Small stem for apple look
+                ctx.shadowBlur = 0; // Reset shadow
+                ctx.beginPath();
+                ctx.moveTo(screenX, screenY - radius);
+                ctx.quadraticCurveTo(screenX + 2, screenY - radius - 4, screenX + 4, screenY - radius - 3);
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+
+            // Draw Food Memory (Pulsing marker)
+            const showMemory = elShowMemory.checked;
+            const perspective = elPerspective.value;
+            if (showMemory && perspective !== 'god') {
+                const snakeIdx = parseInt(perspective.split('-')[1]);
+                const snake = frame.snakes[snakeIdx];
+                if (snake && snake.food_memory) {
+                    snake.food_memory.forEach((mem) => {
+                        const screenX = mem.x * cell + cell / 2;
+                        const screenY = (h - 1 - mem.y) * cell + cell / 2;
+                        
+                        // Pulsing radius based on system time
+                        const pulseScale = 1 + 0.15 * Math.sin(Date.now() / 150);
+                        const radius = cell * 0.22 * pulseScale;
+                        
+                        ctx.beginPath();
+                        ctx.arc(screenX, screenY, radius, 0, 2 * Math.PI);
+                        ctx.fillStyle = 'rgba(251, 191, 36, 0.25)';
+                        ctx.strokeStyle = '#fbbf24';
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([2, 2]); // Dashed line
+                        ctx.stroke();
+                        ctx.fill();
+                        ctx.setLineDash([]); // Reset dash
+                    });
+                }
+            }
+
+            // Draw Snakes
+            frame.snakes.forEach((snake, sIdx) => {
+                if (!snake.body || snake.body.length === 0) return;
+                
+                const color = snake.color || SNAKE_COLORS[sIdx % SNAKE_COLORS.length];
+                const shadowColor = SNAKE_GLOWS[sIdx % SNAKE_GLOWS.length];
+                
+                // Draw Body segments
+                snake.body.forEach((seg, bIdx) => {
+                    const isHead = bIdx === 0;
+                    const screenX = seg.x * cell;
+                    const screenY = (h - 1 - seg.y) * cell;
+                    
+                    if (isHead) {
+                        // Draw Head (glowing round block)
+                        ctx.fillStyle = color;
+                        ctx.beginPath();
+                        ctx.arc(screenX + cell / 2, screenY + cell / 2, cell * 0.44, 0, 2 * Math.PI);
+                        
+                        if (snake.alive) {
+                            ctx.shadowColor = shadowColor;
+                            ctx.shadowBlur = 12;
+                        }
+                        ctx.fill();
+                        ctx.shadowBlur = 0; // reset glow
+
+                        // Draw eyes looking in the direction of the next segment (or previous move)
+                        if (snake.body.length > 1) {
+                            const nextSeg = snake.body[1];
+                            const dx = seg.x - nextSeg.x;
+                            const dy = seg.y - nextSeg.y;
+                            let angle = 0;
+                            if (dx > 0) angle = 0;         // Right
+                            else if (dx < 0) angle = Math.PI; // Left
+                            else if (dy > 0) angle = -Math.PI / 2; // Up
+                            else if (dy < 0) angle = Math.PI / 2;  // Down
+
+                            // Draw eyes based on angle
+                            ctx.save();
+                            ctx.translate(screenX + cell / 2, screenY + cell / 2);
+                            ctx.rotate(angle);
+
+                            // Left Eye
+                            ctx.beginPath();
+                            ctx.arc(cell * 0.15, -cell * 0.16, cell * 0.08, 0, 2 * Math.PI);
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fill();
+                            ctx.beginPath();
+                            ctx.arc(cell * 0.19, -cell * 0.16, cell * 0.04, 0, 2 * Math.PI);
+                            ctx.fillStyle = '#000000';
+                            ctx.fill();
+
+                            // Right Eye
+                            ctx.beginPath();
+                            ctx.arc(cell * 0.15, cell * 0.16, cell * 0.08, 0, 2 * Math.PI);
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fill();
+                            ctx.beginPath();
+                            ctx.arc(cell * 0.19, cell * 0.16, cell * 0.04, 0, 2 * Math.PI);
+                            ctx.fillStyle = '#000000';
+                            ctx.fill();
+
+                            ctx.restore();
+                        }
+                    } else {
+                        // Draw normal body segment (slightly smaller rounded rectangles)
+                        ctx.fillStyle = color;
+                        const radius = cell * 0.36;
+                        const cx = screenX + cell / 2;
+                        const cy = screenY + cell / 2;
+                        
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
+                        ctx.fill();
+                        
+                        // Draw connectivity line between current and previous segment
+                        const prevSeg = snake.body[bIdx - 1];
+                        const prevX = prevSeg.x * cell + cell / 2;
+                        const prevY = (h - 1 - prevSeg.y) * cell + cell / 2;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(cx, cy);
+                        ctx.lineTo(prevX, prevY);
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = radius * 2;
+                        ctx.lineCap = 'round';
+                        ctx.stroke();
+                    }
+                });
+            });
+
+            // Draw Fog of War (Restricted Vision Mask Overlay)
+            if (perspective !== 'god') {
+                const snakeIdx = parseInt(perspective.split('-')[1]);
+                const snake = frame.snakes[snakeIdx];
+                if (snake) {
+                    // Create an overlay mask
+                    ctx.save();
+                    
+                    // Create a secondary canvas layer for drawing the transparent black fog
+                    const fogCanvas = document.createElement('canvas');
+                    fogCanvas.width = elCanvas.width;
+                    fogCanvas.height = elCanvas.height;
+                    const fctx = fogCanvas.getContext('2d');
+                    
+                    // Fill completely with fog
+                    fctx.fillStyle = 'rgba(10, 15, 25, 0.86)';
+                    fctx.fillRect(0, 0, fogCanvas.width, fogCanvas.height);
+                    
+                    // Clear holes (transparent) for visible tiles
+                    fctx.globalCompositeOperation = 'destination-out';
+                    if (snake.visible_tiles) {
+                        snake.visible_tiles.forEach((tile) => {
+                            const screenX = tile.x * cell;
+                            const screenY = (h - 1 - tile.y) * cell;
+                            fctx.fillRect(screenX, screenY, cell, cell);
+                        });
+                    }
+
+                    // Draw the fog canvas onto the main canvas
+                    ctx.drawImage(fogCanvas, 0, 0);
+                    ctx.restore();
+                }
+            }
+        }
+
+        // Animation Frame loop for pulsing food memory
+        function animationLoop() {
+            if (simulationHistory) {
+                renderFrame();
+            }
+            requestAnimationFrame(animationLoop);
+        }
+
+        // Initialize App
+        fetchAgents();
+        requestAnimationFrame(animationLoop);
+    </script>
+</body>
+</html>

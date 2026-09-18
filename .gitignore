@@ -1,0 +1,74 @@
+# Operating systems and editors
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.venv/
+venv/
+ENV/
+*.egg-info/
+build/
+dist/
+wheelhouse/
+
+# Native/CMake builds
+CMakeCache.txt
+CMakeFiles/
+CMakeInit.txt
+cmake_install.cmake
+compile_commands.json
+build.ninja
+.ninja_*
+.cmake/
+_skbuild/
+.skbuild-info.json
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+
+# Documentation builds
+docs/build/
+docs/source/api/
+
+# Training and evaluation output
+models/
+runs/
+eval_results/
+game_logs/
+failed_*/
+*.pt
+*.pth
+*.ckpt
+*.pid
+*.log
+nohup.out
+log*.txt
+results.txt
+tune_best_agent_results.json
+ppo*.zip
+ckpt*.zip
