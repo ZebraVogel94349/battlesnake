@@ -101,10 +101,9 @@ In many games, our snake initially avoided unnecessary food to remain short. Onc
 
 The main lessons from development were the importance of aligning rewards with tournament placement, training against varied strategies, and handling the game's collision and growth rules accurately during inference.
 
-## Reflections on AI use in competitions
+## Note on AI use
 
-We relied heavily on AI agents during development, especially in the later stages, when parts of the project exceeded our own expertise. Their role extended beyond implementation: we also asked them to propose improvements and explore ideas with increasing autonomy. This is an important part of how the entry was developed, and the technical work described above should be read with that contribution in mind.
+The growing capabilities of AI agents create new problems and opportunities for competitions like Battlesnake. There are a variety of different ways participants can adopt AI into their workflow. We, for example, know of at least one participant with a higher score than us who entirely relied on Claude Code for this challenge. We also relied heavily on AI agents, especially in the later stages of the competition, when we reached the limits of our own knowledge and expertise. At this stage, we not only handed over the coding part but also asked the AI to improve the code on its own by coming up with new ideas.
 
-Our experience left us with questions about what competitions like Battlesnake measure as these tools become more capable. Performance may increasingly reflect a combination of a participant’s expertise, their ability to direct an agent, and the agent’s own capabilities. We suspect that knowing which problems to investigate and how to assess a proposed solution remains valuable, but our experience alone cannot establish how much human guidance improves results.
-
-For us, the practical lesson is that delegating more work makes understanding and evaluation more important. Code that runs and a convincing explanation are not sufficient evidence that a change improves the agent. Retaining enough human understanding to question assumptions, interpret results, and redirect development remains an important goal, even as more of the implementation and experimentation becomes automated.
+This poses several questions about the future of such competitions and research in general. Which parts will continue to require human input? Which won't? We believe that, at the moment, participants who know what to direct their agents toward (due to their expertise and experience) still outperform participants who let the agents do everything on their own. This, of course, could change quickly, or it could take decades.
+Moreover, even if agents outperform all researchers in all parts of research at some point, as long as the alignment problem is not solved, we should still keep enough human understanding in the loop to intervene or steer the process when necessary.
